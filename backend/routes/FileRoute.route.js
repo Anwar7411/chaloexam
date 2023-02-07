@@ -4,13 +4,14 @@ const { FileModel } = require('../models/FileModel.model')
 const FileRouter=express.Router();
 
 FileRouter.post("/",async (req,res)=>{
+  
   try{
    let fileupload=await new FileModel({files:req.file.path})
    fileupload.save();
    res.send("File upload successfully")
   }
   catch(err){
-    console.log("Error in FileRouter")
+    console.log("Error in FileRouter",err)
   }
 })
 

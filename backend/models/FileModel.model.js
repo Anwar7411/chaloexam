@@ -1,7 +1,6 @@
 const mongoose=require('mongoose');
 
-const FileSchema=({
-   
+const FileSchema=({ 
     files:String
 })
 
