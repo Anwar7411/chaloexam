@@ -14,8 +14,7 @@ let storage=multer.diskStorage({
 
 let upload=multer({
     storage:storage,
-    fileFilter: function(req,file,cb){
-        
+    fileFilter: function(req,file,cb){    
         if(file.mimetype=='application/vnd.openxmlformats-officedocument.wordprocessingml.document'){
             cb(null,true)
         }else{          

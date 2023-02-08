@@ -8,7 +8,7 @@ function App() {
   const [data, setData] = useState([]);
   const [openerror, setOpenError] =useState({ bool:false, mssg:"" });
   const [opensuccess, setOpenSuccess] =useState({ bool:false, mssg:"" });
-  const [bool,setBool]=useState(false)
+  const [bool, setBool]=useState(false)
 
   useEffect(() => {
     axios.get("http://localhost:8080/upload/getall")
