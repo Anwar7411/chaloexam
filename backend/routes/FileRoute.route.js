@@ -1,5 +1,6 @@
 const express=require('express')
 const { FileModel } = require('../models/FileModel.model')
+var textract = require('@nosferatu500/textract');
 
 const FileRouter=express.Router();
 
@@ -42,6 +43,32 @@ FileRouter.get("/getall",async (req,res)=>{
   }
 })
 
+
+FileRouter.get("/search",async (req,res)=>{
+    let search=req.query.search;
+    try{
+        let data=await FileModel.find()
+        let filename=[];
+        for(let i=0;i<data.length;i++){
+            let letter=data[i].files.slice(8);
+            textract.fromFileWithPath(`uploads/${letter}`, function( error, text ) {
+               if(text==search){
+                   filename.push(data[i])
+               }else if(text.includes(search)){
+                 filename.push(data[i])
+               }
+               if(i==data.length-1){
+               res.send(filename)
+               }
+              
+        })
+        }
+    }
+
+    catch(err){
+        console.log("error in searching file",err)
+    }
+  })
 
 
 

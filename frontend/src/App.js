@@ -1,6 +1,8 @@
 import { Alert, Button, Grid, Input, Snackbar } from '@mui/material';
 import axios from 'axios'
-import { useEffect, useState } from 'react';
+import { useThrottle } from 'use-throttle';
+import { useEffect, useState,useCallback } from 'react';
+import SearchIcon from '@mui/icons-material/Search';
 import './App.css';
 
 function App() {
@@ -9,6 +11,30 @@ function App() {
   const [openerror, setOpenError] =useState({ bool:false, mssg:"" });
   const [opensuccess, setOpenSuccess] =useState({ bool:false, mssg:"" });
   const [bool, setBool]=useState(false)
+  const [searchdata, setSearchData]=useState([]);
+   const [quaery, setQuaery]=useState("");
+   const [inputText, setInputText]=useState("");
+   const [select, setSelect]=useState(false);
+
+   const quaeryHandler=useCallback((val)=>{
+    setQuaery(val);
+  },[]);
+
+  const throttleText=useThrottle(inputText,1000)
+
+  useEffect(()=>{
+    axios.get(`http://localhost:8080/upload/search?search=${quaery}`)
+    .then((res)=>{
+      setSearchData(res.data)
+      console.log("indata",res.data)
+    }).catch((err)=>{
+        console.log(err)
+    })
+   },[quaery])
+
+   useEffect(()=>{
+    quaeryHandler(throttleText)
+},[quaeryHandler,throttleText])
 
   useEffect(() => {
     axios.get("http://localhost:8080/upload/getall")
@@ -49,10 +75,20 @@ function App() {
     setOpenSuccess({ bool:false, mssg:"" });
   };
 
-  const handledownload = (el) => {
+  window.addEventListener('mouseup',function(event){
+    var sugest = document.getElementById('sugest');
+    if(event.target != sugest && event.target.parentNode != sugest){
+        setInputText("");
+        setSelect(false)
+    }
+});  
+
+  const handledownload = (event,el) => {
+    console.log("indownload",el)
+    event.stopPropagation()
     axios.get(`http://localhost:8080/upload/download/${el._id}`)
       .then((res) => {
-        window.location.href = res.data
+        window.location.href = res.data;
       })
       .catch((err) => {
         console.log(err)
@@ -61,6 +97,27 @@ function App() {
 
   return (
     <div className="App">
+      <div className='navbar'>
+        <div>
+          Home
+        </div>
+        <div >
+          <SearchIcon />
+         <input type="text" value={inputText} onChange={(e)=>{setSelect(true);setInputText(e.target.value)}} />
+         <div id="sugest" >
+           {select ? 
+           <div id="sugest">{
+            searchdata.map((item)=>{
+                return <div className='itemdiv'>
+                  <div>{ item.files.slice(8) }</div>
+                  <button onClick={(e) => handledownload(e,item)}>Download</button>
+                </div>
+                }) 
+            }</div>
+            : null }
+        </div>
+        </div>
+      </div>
       <Grid className='formgrid'>
         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAhEK0nHmYil-y_U2VdSNHluYo8Bqs8C2B2A&usqp=CAU" />
         <form onSubmit={handlesubmit}>
@@ -75,7 +132,7 @@ function App() {
           data && data?.map((el) => (
             <Grid item key={el._id} className='innergrid'>
               <h3>{el.files.slice(8)}</h3>
-              <Button onClick={() => handledownload(el)}>Download</Button>
+              <Button onClick={(e) => handledownload(e,el)}>Download</Button>
             </Grid>
           ))
         }
