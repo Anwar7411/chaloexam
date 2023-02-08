@@ -29,4 +29,19 @@ FileRouter.get("/download/:id",async (req,res)=>{
     }
 })
 
+FileRouter.get("/getall",async (req,res)=>{
+  try{
+      let data=await FileModel.find()
+      if(data.length>0){
+          res.send(data)
+      }
+  }
+  catch(err){
+      console.log("error in downloading file",err)
+  }
+})
+
+
+
+
 module.exports={FileRouter}
